@@ -34,7 +34,7 @@ impl Plugin for VertexPullingRenderPlugin {
             use super::index_buffer::{CuboidsIndexBuffer, CUBE_INDICES_HANDLE};
             use bevy::render::render_asset::RenderAssetPlugin;
             app.add_asset::<CuboidsIndexBuffer>()
-                .add_plugin(RenderAssetPlugin::<CuboidsIndexBuffer>::default());
+                .add_plugins(RenderAssetPlugin::<CuboidsIndexBuffer>::default());
             app.world
                 .resource_mut::<Assets<CuboidsIndexBuffer>>()
                 .set_untracked(CUBE_INDICES_HANDLE, CuboidsIndexBuffer);

@@ -1,5 +1,5 @@
 [package]
-name = "bevy-aabb-instancing"
+name = "bevy-aabb-instancing-011"
 version = "0.9.1"
 edition = "2021"
 description = "Render millions of AABB instances in Bevy."

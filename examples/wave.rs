@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_aabb_instancing::{
+use bevy_aabb_instancing_011::{
     Cuboid, CuboidMaterial, CuboidMaterialId, CuboidMaterialMap, Cuboids,
     VertexPullingRenderPlugin, COLOR_MODE_SCALAR_HUE,
 };

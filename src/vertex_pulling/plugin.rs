@@ -41,7 +41,10 @@ impl Plugin for VertexPullingRenderPlugin {
         }
 
         let maybe_msaa = app.world.get_resource::<Msaa>().cloned();
-        let render_app = app.sub_app_mut(RenderApp);
+        let render_app = match app.get_sub_app_mut(RenderApp) {
+            Ok(render_app) => render_app,
+            Err(_) => return,
+        };
 
         if let Some(msaa) = maybe_msaa {
             render_app.insert_resource(msaa);
@@ -51,29 +54,37 @@ impl Plugin for VertexPullingRenderPlugin {
             shader_defs.enable_outlines();
         }
         render_app.insert_resource(shader_defs);
+    }
+
+    fn finish(&self, app: &mut App) {
+        let render_app = match app.get_sub_app_mut(RenderApp) {
+            Ok(render_app) => render_app,
+            Err(_) => return,
+        };
 
         render_app
-            .add_render_command::<Opaque3d, DrawCuboids>()
-            .init_resource::<AuxiliaryMeta>()
-            .init_resource::<CuboidBufferCache>()
-            .init_resource::<CuboidsPipelines>()
-            .init_resource::<DynamicUniformBufferOfCuboidMaterial>()
-            .init_resource::<DynamicUniformBufferOfCuboidTransforms>()
-            .init_resource::<TransformsMeta>()
-            .init_resource::<UniformBufferOfGpuClippingPlaneRanges>()
-            .init_resource::<ViewMeta>()
-            .add_systems(ExtractSchedule,(extract_cuboids, extract_clipping_planes))
-            .add_systems(
-                Render,
-                (
-                    prepare_materials,
-                    prepare_clipping_planes,
-                    prepare_auxiliary_bind_group,
-                    prepare_cuboid_transforms,
-                    prepare_cuboids,
-                    prepare_cuboids_view_bind_group
-                ).in_set(RenderSet::Prepare)
-            )
-            .add_systems(Render, queue_cuboids.in_set(RenderSet::Queue));
+        .add_render_command::<Opaque3d, DrawCuboids>()
+        .init_resource::<AuxiliaryMeta>()
+        .init_resource::<CuboidBufferCache>()
+        .init_resource::<CuboidsPipelines>()
+        .init_resource::<DynamicUniformBufferOfCuboidMaterial>()
+        .init_resource::<DynamicUniformBufferOfCuboidTransforms>()
+        .init_resource::<TransformsMeta>()
+        .init_resource::<UniformBufferOfGpuClippingPlaneRanges>()
+        .init_resource::<ViewMeta>()
+        .add_systems(ExtractSchedule,(extract_cuboids, extract_clipping_planes))
+        .add_systems(
+            Render,
+            (
+                prepare_materials,
+                prepare_clipping_planes,
+                prepare_auxiliary_bind_group,
+                prepare_cuboid_transforms,
+                prepare_cuboids,
+                prepare_cuboids_view_bind_group
+            ).in_set(RenderSet::Prepare)
+        )
+        .add_systems(Render, queue_cuboids.in_set(RenderSet::Queue));
     }
+
 }

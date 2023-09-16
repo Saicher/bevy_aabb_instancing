@@ -17,7 +17,6 @@ fn main() {
         .run();
 }
 
-
 fn setup(mut commands: Commands, mut material_map: ResMut<CuboidMaterialMap>) {
     let material_id = material_map.push(CuboidMaterial {
         color_mode: COLOR_MODE_SCALAR_HUE,

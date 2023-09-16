@@ -7,15 +7,16 @@ use smooth_bevy_cameras::{controllers::fps::*, LookTransformPlugin};
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins((
+            DefaultPlugins,
+            VertexPullingRenderPlugin { outlines: true },
+        ))
         .insert_resource(Msaa::Off)
-        .add_plugin(VertexPullingRenderPlugin { outlines: true })
-        .add_plugin(LookTransformPlugin)
-        .add_plugin(FpsCameraPlugin::default())
-        .add_startup_system(setup)
-        .add_system(update_scalar_hue_options)
+        .add_systems(Startup, setup)
+        .add_systems(Update, update_scalar_hue_options)
         .run();
 }
+
 
 fn setup(mut commands: Commands, mut material_map: ResMut<CuboidMaterialMap>) {
     let material_id = material_map.push(CuboidMaterial {
@@ -54,18 +55,6 @@ fn setup(mut commands: Commands, mut material_map: ResMut<CuboidMaterialMap>) {
                 .insert((cuboids, aabb, material_id));
         }
     }
-
-    commands
-        .spawn(Camera3dBundle::default())
-        .insert(FpsCameraBundle::new(
-            FpsCameraController {
-                translate_sensitivity: 200.0,
-                ..Default::default()
-            },
-            Vec3::new(0.0, 100.0, 0.0),
-            Vec3::new(100.0, 0.0, 100.0),
-            Vec3::Y,
-        ));
 }
 
 fn update_scalar_hue_options(time: Res<Time>, mut material_map: ResMut<CuboidMaterialMap>) {

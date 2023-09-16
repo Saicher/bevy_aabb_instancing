@@ -11,8 +11,9 @@ use super::queue::queue_cuboids;
 use crate::CuboidMaterialMap;
 use bevy::core_pipeline::core_3d::Opaque3d;
 use bevy::prelude::*;
-use bevy::render::view::ViewSet;
+//use bevy::render::view::ViewSet;
 use bevy::render::RenderSet;
+use bevy::render::Render;
 use bevy::render::{render_phase::AddRenderCommand, RenderApp};
 
 /// Renders the [`Cuboids`](crate::Cuboids) component using the "vertex pulling" technique.
@@ -27,7 +28,7 @@ impl Plugin for VertexPullingRenderPlugin {
 
         app.world.resource_mut::<Assets<Shader>>().set_untracked(
             VERTEX_PULLING_SHADER_HANDLE,
-            Shader::from_wgsl(include_str!("vertex_pulling.wgsl")),
+            Shader::from_wgsl(include_str!("vertex_pulling.wgsl"), "vertex_pulling.wgsl"),
         );
         {
             use super::index_buffer::{CuboidsIndexBuffer, CUBE_INDICES_HANDLE};
@@ -61,20 +62,18 @@ impl Plugin for VertexPullingRenderPlugin {
             .init_resource::<TransformsMeta>()
             .init_resource::<UniformBufferOfGpuClippingPlaneRanges>()
             .init_resource::<ViewMeta>()
-            .add_systems((extract_cuboids, extract_clipping_planes).in_schedule(ExtractSchedule))
+            .add_systems(ExtractSchedule,(extract_cuboids, extract_clipping_planes))
             .add_systems(
+                Render,
                 (
                     prepare_materials,
                     prepare_clipping_planes,
-                    prepare_auxiliary_bind_group
-                        .after(prepare_materials)
-                        .after(prepare_clipping_planes),
+                    prepare_auxiliary_bind_group,
                     prepare_cuboid_transforms,
                     prepare_cuboids,
-                    prepare_cuboids_view_bind_group.after(ViewSet::PrepareUniforms),
-                )
-                    .in_set(RenderSet::Prepare),
+                    prepare_cuboids_view_bind_group
+                ).in_set(RenderSet::Prepare)
             )
-            .add_system(queue_cuboids.in_set(RenderSet::Queue));
+            .add_systems(Render, queue_cuboids.in_set(RenderSet::Queue));
     }
 }
